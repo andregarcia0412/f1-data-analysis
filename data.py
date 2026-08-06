@@ -21,3 +21,9 @@ def wins_by_gp(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_id: int)
 
 def average_position(driver_id: int, df_results: pd.DataFrame):
     return pd.to_numeric(df_results[df_results["driverId"] == driver_id]["position"], errors="coerce").mean()
+
+def poles_by_gp(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_id: int):
+    df_driver_grid = df_results[df_results["driverId"] == driver_id]
+    df_pole_ids = df_driver_grid[df_driver_grid["grid"] == 1]["raceId"].to_numpy()
+    pole_counts = df_races[df_races["raceId"].isin(df_pole_ids)]["name"].value_counts()
+    return pole_counts, len(df_pole_ids)
