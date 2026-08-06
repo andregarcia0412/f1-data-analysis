@@ -135,6 +135,25 @@ wheels = [
 ]
 
 [[package]]
+name = "f1-data-analysis"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "streamlit" },
+    { name = "streamlit-echarts" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "numpy", specifier = ">=2.5.1" },
+    { name = "pandas", specifier = ">=3.0.5" },
+    { name = "streamlit", specifier = ">=1.61.1" },
+    { name = "streamlit-echarts", specifier = ">=0.7.0" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -687,20 +706,15 @@ wheels = [
 ]
 
 [[package]]
-name = "f1-data-analysis"
-version = "0.1.0"
-source = { virtual = "." }
+name = "streamlit-echarts"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy" },
-    { name = "pandas" },
     { name = "streamlit" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "numpy", specifier = ">=2.5.1" },
-    { name = "pandas", specifier = ">=3.0.5" },
-    { name = "streamlit", specifier = ">=1.61.1" },
+sdist = { url = "https://files.pythonhosted.org/packages/7b/3f/379203fed5c1ea0128f3d09a42dd3e992621081b0f01fd96283dd215abef/streamlit_echarts-0.7.0.tar.gz", hash = "sha256:831fffa4daba03b31afaf560aa5e5947b021ccf714e41c456c82301f9af06089", size = 700422, upload-time = "2026-06-08T04:43:38.602Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/32/c4ff3617e29c0afcad19d19f76618dd51f7e9a88031336e4ff56d28520bd/streamlit_echarts-0.7.0-py3-none-any.whl", hash = "sha256:f9d20cb8b7075070cd72ee815ca4113ab5047264a142ba581eb8d9d60fa6b076", size = 702553, upload-time = "2026-06-08T04:43:36.99Z" },
 ]
 
 [[package]]

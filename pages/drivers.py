@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_echarts import st_echarts
 from metrics import load_data, wins_by_gp, average_position, poles_by_gp, points_per_season
 
 df_drivers, df_races, df_driver_standings, df_results = load_data()
@@ -43,5 +44,21 @@ if amount_won >= 1:
 
 st.space()
 
-st.line_chart(points_per_season(df_results, df_races, driver_id), x_label="Year", y_label="Points")
+points = points_per_season(df_results, df_races, driver_id)
+st_echarts({
+    "tooltip": {"trigger": "axis"},
+    "xAxis": {
+        "type": "category",
+        "name": "Year",
+        "data": [str(year) for year in points.index],
+    },
+    "yAxis": {"type": "value", "name": "Points"},
+    "series": [{
+        "type": "line",
+        "data": points.tolist(),
+        "smooth": True,
+        "areaStyle": {"opacity": 0.15},
+        "animationDuration": 800,
+    }],
+}, height="400px")
 st.caption(f"{driver_name}'s points per season", width="stretch", text_alignment="center")
