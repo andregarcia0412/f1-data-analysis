@@ -1,5 +1,5 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 @st.cache_data
 def load_data():
@@ -11,6 +11,7 @@ def load_data():
         pd.read_csv("./data/driver_standings.csv"),
         pd.read_csv("./data/results.csv"),
     )
+
 
 def wins_by_gp(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_id: int):
     df_driver_results = df_results[df_results["driverId"] == driver_id]
