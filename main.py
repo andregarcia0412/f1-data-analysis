@@ -1,31 +1,37 @@
 import pandas as pd
 import streamlit as st
+from data import load_data, wins_by_gp, average_position
 
-@st.cache_data
-def load_data():
-    df_drivers = pd.read_csv("./data/drivers.csv")
-    df_drivers["fullName"] = df_drivers["forename"] + " " + df_drivers["surname"] 
-    return (
-        df_drivers,
-        pd.read_csv("./data/races.csv"),
-        pd.read_csv("./data/driver_standings.csv"),
-        pd.read_csv("./data/results.csv"),
-    )
-df_drivers, df_races, df_driver_standings, df_results = load_data()   
-st.title("F1 Data Analysis")
+df_drivers, df_races, df_driver_standings, df_results = load_data()
+
+st.set_page_config(page_title="F1 Data Analysis", layout="wide")
+
 st.sidebar.title(":material/filter_alt: Filters", anchor=False)
-driver_name = st.sidebar.selectbox("Driver", df_drivers["fullName"].to_numpy())
+driver_name = st.sidebar.selectbox(
+    "Driver", 
+    df_drivers["fullName"].to_numpy()
+)
+st.title(f"F1 Data Analysis - {driver_name}", anchor=False)
+
 driver_id = df_drivers[df_drivers["fullName"] == driver_name]["driverId"].item()
 
-df_driver_results = df_results[df_results["driverId"] == driver_id]
-won_race_ids = df_driver_results[df_driver_results["positionOrder"] == 1]["raceId"].to_numpy()
-won_gp_counts = df_races[df_races["raceId"].isin(won_race_ids)]["name"].value_counts()
-amount_won = (df_driver_results["positionOrder"] == 1).sum()
-total_races = len(df_driver_results)
+won_gp_counts, total_races = wins_by_gp(df_results, df_races, driver_id)
+amount_won = won_gp_counts.sum()
 
-if total_races == 0:
-    st.subheader(f"{driver_name} has no race results", anchor=False)
-else:
-    st.subheader(f"{driver_name} has won {amount_won} of {total_races} races ({((amount_won/total_races) * 100):.2f}%)", anchor=False)
-    if amount_won >= 1:
+col1, col2, col3, col4 = st.columns(4)
+col1.metric(label="Races Won", value=amount_won, border=True)
+col2.metric(label="Win Rate", value=f"{((amount_won/total_races) * 100):.2f}%", border=True)
+col3.metric(label="Races Started", value=total_races, border=True)
+col4.metric(label="Average Position", value=f"{average_position(driver_id, df_results):.2f}", border=True)
+
+st.space()
+
+if amount_won >= 1:
+    col1, col2 = st.columns(2, vertical_alignment="center")
+    with col1:
         st.bar_chart(won_gp_counts, horizontal=True, sort=False, x_label="Grand Prix", y_label="Wins")
+        st.caption(
+            f"Wins per Grand Prix — {driver_name} ({total_races} races entered)",
+            width="stretch",
+            text_alignment="center",
+        )
