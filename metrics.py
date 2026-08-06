@@ -43,3 +43,9 @@ def fastest_time(df_results: pd.DataFrame, df_races: pd.DataFrame, df_drivers: p
     fastest_lap_time_row = subset.loc[subset["fastestLapTime"].idxmin()].to_dict()
     driver_name = df_drivers[df_drivers["driverId"] == fastest_lap_time_row["driverId"]]["fullName"].item()
     return fastest_lap_time_row["fastestLapTime"], driver_name
+
+def points_per_season(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_id: int):
+    driver_results_df = df_results[df_results["driverId"] == driver_id][["raceId", "points"]]
+    driver_races_df = df_races[df_races["raceId"].isin(driver_results_df["raceId"])][["raceId", "year"]]
+    df_points_per_season = pd.merge(driver_races_df, driver_results_df, on="raceId")
+    return df_points_per_season.groupby("year")["points"].sum()

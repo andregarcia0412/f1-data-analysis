@@ -1,5 +1,5 @@
 import streamlit as st
-from metrics import load_data, wins_by_gp, average_position, poles_by_gp
+from metrics import load_data, wins_by_gp, average_position, poles_by_gp, points_per_season
 
 df_drivers, df_races, df_driver_standings, df_results = load_data()
 
@@ -40,3 +40,8 @@ if amount_won >= 1:
             width="stretch",
             text_alignment="left"
         )
+
+st.space()
+
+st.line_chart(points_per_season(df_results, df_races, driver_id), x_label="Year", y_label="Points")
+st.caption(f"{driver_name}'s points per season", width="stretch", text_alignment="center")

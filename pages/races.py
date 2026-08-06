@@ -17,3 +17,4 @@ col1, col2, col3, col4 = st.columns(4, vertical_alignment="center")
 
 col1.metric(label="Driver with most wins", value=top_wins, delta_description=top_winner, border=True)
 col2.metric(label="Fastest Lap", value=fastest_lap_time, delta_description=fastest_lap_driver, border=True, help="Based on race sessions only; practice and qualifying are excluded.")
+# TODO: coluna de fastest speed recorded
