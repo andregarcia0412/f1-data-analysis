@@ -8,7 +8,7 @@ driver_name = st.sidebar.selectbox(
     "Driver", 
     df_drivers["fullName"].to_numpy()
 )
-st.title(f"F1 Data Analysis - {driver_name}", anchor=False)
+st.title(f"F1 Driver Analysis - {driver_name}", anchor=False)
 
 driver_id = df_drivers[df_drivers["fullName"] == driver_name]["driverId"].item()
 
