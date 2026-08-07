@@ -21,6 +21,11 @@ def load_circuits():
     return pd.read_csv("./data/circuits.csv", na_values=[r"\N"])
 
 
+@st.cache_data
+def load_constructors():
+    return pd.read_csv("./data/constructors.csv", na_values=[r"\N"])
+
+
 def wins_by_gp(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_id: int):
     df_driver_results = df_results[df_results["driverId"] == driver_id]
     won_race_ids = df_driver_results[df_driver_results["positionOrder"] == 1][
@@ -235,3 +240,22 @@ def teammate_duels(
 
     duels = duels.sort_values(by=["year", "races"], ascending=[True, True])
     return duels[["label", "ahead", "behind", "inconclusive"]]
+
+
+def top_gp_constructor(
+    df_results: pd.DataFrame,
+    df_races: pd.DataFrame,
+    df_constructors: pd.DataFrame,
+    gp_name: str,
+):
+    race_ids = df_races[df_races["name"] == gp_name]["raceId"].to_numpy()
+    race_results = df_results[
+        df_results["raceId"].isin(race_ids) & (df_results["positionOrder"] == 1)
+    ]["constructorId"].value_counts()
+
+    return (
+        df_constructors[df_constructors["constructorId"] == race_results.index[0]][
+            "name"
+        ].item(),
+        int(race_results.values[0]),
+    )
