@@ -23,29 +23,75 @@ col2.metric(label="Win Rate", value=f"{((amount_won/total_races) * 100):.2f}%", 
 col3.metric(label="Races Started", value=total_races, border=True)
 col4.metric(label="Average Position", value=f"{average_position(driver_id, df_results):.2f}", border=True)
 
-st.space()
-
 if amount_won >= 1:
     col1, col2 = st.columns(2, vertical_alignment="top", gap="large")
     with col1:
-        st.bar_chart(won_gp_counts, horizontal=True, sort=False, x_label="Grand Prix", y_label="Wins", height=500)
-        st.caption(
-            f"Wins per Grand Prix ({total_races} races entered)",
-            width="stretch",
-            text_alignment="left",
-        )
+        won_sorted = won_gp_counts.sort_values()
+        st_echarts({
+            "title": {
+              "subtext": f"Wins per Grand Prix ({total_races} races entered)",
+              "bottom": 25,
+              "subtextStyle": {"fontSize": "14px"}
+            },
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "grid": {"left": 8, "right": 24, "containLabel": True},
+            "xAxis": {
+                "type": "value",
+                "name": "Wins",
+                "nameLocation": "middle",
+                "minInterval": 1,
+                "axisLabel": "Wins"
+            },
+            "yAxis": {
+                "type": "category",
+                "data": won_sorted.index.tolist(),
+                "axisLabel": {"interval": 0},
+            },
+            "series": [{
+                "type": "bar",
+                "data": won_sorted.tolist(),
+                "animationDuration": 800,
+                "label": {"show": True, "position": "right"},
+            }],
+        }, height="600px")
     with col2:
-        st.bar_chart(pole_counts, horizontal=True, sort=False, x_label="Grand Prix", y_label="Pole Positions", height=500)
-        st.caption(
-            f"Pole Positions per Grand Prix ({total_poles} total)",
-            width="stretch",
-            text_alignment="left"
-        )
+        poles_sorted = pole_counts.sort_values()
+        st_echarts({
+            "title": {
+              "subtext": f"Pole Positions per Grand Prix ({total_poles} total)",
+              "bottom": 25,
+              "subtextStyle": {"fontSize": "14px"}
+            },
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "grid": {"left": 8, "right": 24, "containLabel": True},
+            "xAxis": {
+                "type": "value",
+                "name": "Pole Positions",
+                "nameLocation": "middle",
+                "minInterval": 1,
+                "axisLabel": "Pole Positions"
+            },
+            "yAxis": {
+                "type": "category",
+                "data": poles_sorted.index.tolist(),
+                "axisLabel": {"interval": 0},
+            },
+            "series": [{
+                "type": "bar",
+                "data": poles_sorted.tolist(),
+                "animationDuration": 800,
+                "label": {"show": True, "position": "right"},
+            }],
+        }, height="600px")
 
-st.space()
 
 points = points_per_season(df_results, df_races, driver_id)
 st_echarts({
+    "title": {
+        "subtext": f"{driver_name}'s points per season",
+        "bottom": 25,
+        "subtextStyle": {"fontSize": "14px"}
+    },
     "tooltip": {"trigger": "axis"},
     "xAxis": {
         "type": "category",
@@ -61,4 +107,3 @@ st_echarts({
         "animationDuration": 800,
     }],
 }, height="400px")
-st.caption(f"{driver_name}'s points per season", width="stretch", text_alignment="center")
