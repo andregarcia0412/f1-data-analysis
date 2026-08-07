@@ -1,6 +1,6 @@
 import math
 import streamlit as st
-from streamlit_echarts import st_echarts
+from streamlit_echarts import JsCode, st_echarts
 from metrics import (
     load_data,
     wins_by_gp,
@@ -9,6 +9,7 @@ from metrics import (
     points_per_season,
     abandon_reasons,
     position_distribution,
+    teammate_duels,
 )
 
 df_drivers, df_races, df_driver_standings, df_results, df_status = load_data()
@@ -82,7 +83,6 @@ if amount_won >= 1:
                     "subtextStyle": {"fontSize": "14px"},
                 },
                 "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
-                "grid": {"left": 8, "right": 24, "containLabel": True},
                 "xAxis": {
                     "type": "value",
                     "name": "Pole Positions",
@@ -206,3 +206,88 @@ st_echarts(
     },
     height="400px",
 )
+
+duels = teammate_duels(df_results, df_races, df_drivers, df_status, driver_id)
+
+if not duels.empty:
+    labels = duels["label"].tolist()
+    ahead = duels["ahead"].tolist()
+    behind = duels["behind"].tolist()
+    inconclusive = duels["inconclusive"].tolist()
+    half = [value / 2 for value in inconclusive]
+
+    tooltip_formatter = JsCode("""
+        function (params) {
+            var row = params[0].axisValue + '<br/>';
+            params.forEach(function (p) {
+                if (p.seriesName.charAt(0) === '_') return;
+                row += p.marker + ' ' + p.seriesName + ': '
+                    + Math.round(Math.abs(p.value) * (p.seriesName === 'Neither classified' ? 2 : 1))
+                    + '<br/>';
+            });
+            return row;
+        }
+        """)
+
+    st_echarts(
+        {
+            "title": {
+                "subtext": f"{driver_name} vs. teammates, season by season",
+                "bottom": 0,
+                "subtextStyle": {"fontSize": "14px"},
+            },
+            "tooltip": {
+                "trigger": "axis",
+                "axisPointer": {"type": "shadow"},
+                "formatter": tooltip_formatter,
+            },
+            "legend": {"data": ["Ahead", "Behind", "Neither classified"], "top": 0},
+            "grid": {"left": 8, "right": 24, "top": 40, "containLabel": True},
+            "xAxis": {
+                "type": "value",
+                "name": "Races",
+                "nameLocation": "middle",
+                "nameGap": 28,
+                "axisLabel": {
+                    "formatter": JsCode("function (v) { return Math.abs(v); }")
+                },
+            },
+            "yAxis": {
+                "type": "category",
+                "data": labels,
+                "axisLabel": {"interval": 0},
+            },
+            "series": [
+                {
+                    "name": "_inconclusive_left",
+                    "type": "bar",
+                    "stack": "duel",
+                    "data": [-value for value in half],
+                    "itemStyle": {"color": "#D9D7D0"},
+                    "silent": True,
+                },
+                {
+                    "name": "Behind",
+                    "type": "bar",
+                    "stack": "duel",
+                    "data": [-value for value in behind],
+                    "itemStyle": {"color": "#B4B2A9"},
+                },
+                {
+                    "name": "Neither classified",
+                    "type": "bar",
+                    "stack": "duel",
+                    "data": half,
+                    "itemStyle": {"color": "#D9D7D0"},
+                },
+                {
+                    "name": "Ahead",
+                    "type": "bar",
+                    "stack": "duel",
+                    "data": ahead,
+                    "itemStyle": {"color": "#185FA5"},
+                },
+            ],
+        },
+        height=f"{120 + len(labels) * 34}px",
+    )

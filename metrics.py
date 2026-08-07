@@ -185,3 +185,53 @@ def wins_per_grid(df_results: pd.DataFrame, df_races: pd.DataFrame, gp_name: str
         return counts
 
     return counts.reindex(range(1, int(counts.index.max()) + 1), fill_value=0)
+
+
+def teammate_duels(
+    df_results: pd.DataFrame,
+    df_races: pd.DataFrame,
+    df_drivers: pd.DataFrame,
+    df_status: pd.DataFrame,
+    driver_id: int,
+):
+    classified = df_status[
+        df_status["status"].eq("Finished") | df_status["status"].str.startswith("+")
+    ]["statusId"]
+
+    base = df_results[["raceId", "driverId", "constructorId", "positionOrder"]].copy()
+    base["classified"] = df_results["statusId"].isin(classified)
+
+    pairs = base.merge(base, on=["raceId", "constructorId"], suffixes=("", "_mate"))
+    pairs = pairs[
+        (pairs["driverId"] == driver_id) & (pairs["driverId_mate"] != driver_id)
+    ]
+
+    if pairs.empty:
+        return pd.DataFrame(columns=["label", "ahead", "behind", "inconclusive"])
+
+    pairs = pairs.merge(df_races[["raceId", "year"]], on="raceId")
+
+    both_classified = pairs["classified"] & pairs["classified_mate"]
+    pairs["ahead"] = both_classified & (
+        pairs["positionOrder"] < pairs["positionOrder_mate"]
+    )
+    pairs["behind"] = both_classified & (
+        pairs["positionOrder"] > pairs["positionOrder_mate"]
+    )
+    pairs["inconclusive"] = ~pairs["ahead"] & ~pairs["behind"]
+
+    duels = (
+        pairs.groupby(["year", "driverId_mate"])[["ahead", "behind", "inconclusive"]]
+        .sum()
+        .reset_index()
+    )
+    duels = duels.merge(
+        df_drivers[["driverId", "fullName"]],
+        left_on="driverId_mate",
+        right_on="driverId",
+    )
+    duels["races"] = duels["ahead"] + duels["behind"] + duels["inconclusive"]
+    duels["label"] = duels["year"].astype(str) + "  ·  " + duels["fullName"]
+
+    duels = duels.sort_values(by=["year", "races"], ascending=[True, True])
+    return duels[["label", "ahead", "behind", "inconclusive"]]
