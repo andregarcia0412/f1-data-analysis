@@ -24,4 +24,10 @@ col2.metric(
     border=True, 
     help="Based on race sessions only; practice and qualifying are excluded."
 )
-col3.metric(label="Fastest Lap Speed", value=fastest_lap_speed, delta_description=fastest_driver, border=True)
+col3.metric(
+    label="Fastest Lap Speed", 
+    value=fastest_lap_speed, 
+    delta_description=fastest_driver, 
+    border=True,
+    help="Based on race sessions only; practice and qualifying are excluded."
+)
