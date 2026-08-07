@@ -172,3 +172,16 @@ def position_distribution(df_results: pd.DataFrame, driver_id: int):
     )
 
     return counts.reindex(range(1, int(counts.index.max()) + 1), fill_value=0)
+
+
+def wins_per_grid(df_results: pd.DataFrame, df_races: pd.DataFrame, gp_name: str):
+    race_ids = df_races[df_races["name"] == gp_name]["raceId"]
+    winners = df_results[
+        df_results["raceId"].isin(race_ids) & (df_results["positionOrder"] == 1)
+    ]
+    counts = winners["grid"].value_counts().sort_index()
+
+    if counts.empty:
+        return counts
+
+    return counts.reindex(range(1, int(counts.index.max()) + 1), fill_value=0)

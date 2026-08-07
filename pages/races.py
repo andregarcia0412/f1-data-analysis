@@ -6,6 +6,7 @@ from metrics import (
     fastest_time,
     fastest_speed_recorded,
     yearly_fastest_lap,
+    wins_per_grid,
 )
 
 df_drivers, df_races, df_driver_standings, df_results, _ = load_data()
@@ -69,6 +70,42 @@ if len(years) > 0 and len(laps) > 0:
                     "data": laps,
                     "smooth": True,
                     "areaStyle": {"opacity": 0.15},
+                    "animationDuration": 800,
+                }
+            ],
+        },
+        height="400px",
+    )
+
+wins_per_grid_counts = wins_per_grid(df_results, df_races, gp_name)
+
+if not wins_per_grid_counts.empty:
+    total_wins = int(wins_per_grid_counts.sum())
+    from_pole = int(wins_per_grid_counts.get(1, 0))
+
+    st_echarts(
+        {
+            "title": {
+                "subtext": (
+                    f"Wins by starting position at the {gp_name} "
+                    f"({from_pole} of {total_wins} won from pole)"
+                ),
+                "bottom": 25,
+                "subtextStyle": {"fontSize": "14px"},
+            },
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "xAxis": {
+                "type": "category",
+                "name": "Starting position",
+                "data": [str(grid) for grid in wins_per_grid_counts.index],
+                "axisTick": {"alignWithLabel": True},
+                "axisLabel": {"interval": 0},
+            },
+            "yAxis": {"type": "value", "name": "Wins", "minInterval": 1},
+            "series": [
+                {
+                    "type": "bar",
+                    "data": wins_per_grid_counts.tolist(),
                     "animationDuration": 800,
                 }
             ],
