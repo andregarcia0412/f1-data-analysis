@@ -10,3 +10,7 @@ dependencies = [
     "streamlit>=1.61.1",
     "streamlit-echarts>=0.7.0",
 ]
+
+[tool.pylint.messages_control]
+disable = ["missing-module-docstring"]
+disable = ["missing-function-docstring"]

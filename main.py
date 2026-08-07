@@ -1,6 +1,10 @@
 import streamlit as st
 
-st.set_page_config(page_title="F1 Data Analysis", layout="wide", page_icon=":material/sports_motorsports:")
+st.set_page_config(
+    page_title="F1 Data Analysis",
+    layout="wide",
+    page_icon=":material/sports_motorsports:",
+)
 
 pages = [
     st.Page("pages/drivers.py", title="Drivers", icon=":material/sports_motorsports:"),
