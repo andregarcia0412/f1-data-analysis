@@ -133,12 +133,43 @@ st_echarts(
     height="400px",
 )
 
-reasons = abandon_reasons(df_results, df_status, driver_id)
+data = abandon_reasons(df_results, df_status, driver_id, 15)
+reasons = [d["name"] for d in data]
+values = [d["value"] for d in data]
+
 st_echarts(
     {
-        "title": {"text": "Driver Race Status", "top": "20"},
+        "title": {
+            "subtext": f"{driver_name}'s top {15 if len(data) == 16 else len(data)} abandon reasons",
+            "bottom": 0,
+            "subtextStyle": {"fontSize": "14px"},
+        },
+        "grid": {"left": 8, "right": 40, "top": 20, "bottom": 30, "containLabel": True},
+        "xAxis": {
+            "type": "category",
+            "data": reasons,
+            "axisTick": {"show": False},
+            "axisLabel": {"interval": 0, "rotate": 30},
+        },
+        "yAxis": {"type": "value", "splitLine": {"show": True}},
         "tooltip": {"trigger": "item"},
-        "series": [{"name": "Reason", "type": "pie", "radius": "50%", "data": reasons}],
+        "series": [
+            {
+                "type": "bar",
+                "data": values,
+                "barWidth": 2,
+                "itemStyle": {"color": "#B4B2A9"},
+                "z": 1,
+            },
+            {
+                "type": "scatter",
+                "data": [[r, v] for r, v in zip(reasons, values)],
+                "symbolSize": 14,
+                "itemStyle": {"color": "#185FA5"},
+                "label": {"show": True, "position": "right", "formatter": "{@[1]}"},
+                "z": 2,
+            },
+        ],
     },
-    height="400px",
+    height="420px",
 )

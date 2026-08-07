@@ -98,19 +98,25 @@ def fastest_speed_recorded(
     return fastest_speed_recorded_row["fastestLapSpeed"], driver_name
 
 
-def abandon_reasons(df_results: pd.DataFrame, df_status: pd.DataFrame, driver_id: int):
+def abandon_reasons(
+    df_results: pd.DataFrame,
+    df_status: pd.DataFrame,
+    driver_id: int,
+    values_threshold=5,
+):
     driver_status_df = df_results[df_results["driverId"] == driver_id]
     status_counts = (
         pd.merge(driver_status_df, df_status, on="statusId")["status"]
         .value_counts()
         .drop("Finished", errors="ignore")
     )
+    status_counts = status_counts[~status_counts.index.str.startswith("+")]
 
-    top = status_counts.head(5)
-    others = status_counts.iloc[5:].sum()
+    top = status_counts.head(values_threshold).sort_values()
+    others = status_counts.iloc[values_threshold:].sum()
 
     data = [{"name": name, "value": int(value)} for name, value in top.items()]
     if others > 0:
-        data.append({"name": "Other", "value": int(others)})
+        data.insert(0, {"name": "Other", "value": int(others)})
 
     return data
