@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_echarts import st_echarts
+import math
 from metrics import (
     load_data,
     wins_by_gp,
@@ -20,6 +21,7 @@ driver_id = df_drivers[df_drivers["fullName"] == driver_name]["driverId"].item()
 won_gp_counts, total_races = wins_by_gp(df_results, df_races, driver_id)
 amount_won = won_gp_counts.sum()
 pole_counts, total_poles = poles_by_gp(df_results, df_races, driver_id)
+avg_position = average_position(driver_id, df_results)
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric(label="Races Won", value=amount_won, border=True)
@@ -29,7 +31,7 @@ col2.metric(
 col3.metric(label="Races Started", value=total_races, border=True)
 col4.metric(
     label="Average Position",
-    value=f"{average_position(driver_id, df_results):.2f}",
+    value=f"{avg_position:.2f}" if not math.isnan(avg_position) else "-",
     border=True,
 )
 

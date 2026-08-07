@@ -4,14 +4,14 @@ import streamlit as st
 
 @st.cache_data
 def load_data():
-    df_drivers = pd.read_csv("./data/drivers.csv")
+    df_drivers = pd.read_csv("./data/drivers.csv", na_values=[r"\N"])
     df_drivers["fullName"] = df_drivers["forename"] + " " + df_drivers["surname"]
     return (
         df_drivers,
-        pd.read_csv("./data/races.csv"),
-        pd.read_csv("./data/driver_standings.csv"),
-        pd.read_csv("./data/results.csv"),
-        pd.read_csv("./data/status.csv"),
+        pd.read_csv("./data/races.csv", na_values=[r"\N"]),
+        pd.read_csv("./data/driver_standings.csv", na_values=[r"\N"]),
+        pd.read_csv("./data/results.csv", na_values=[r"\N"]),
+        pd.read_csv("./data/status.csv", na_values=[r"\N"]),
     )
 
 
@@ -63,6 +63,12 @@ def fastest_time(
 ):
     race_ids = df_races[df_races["name"] == gp_name]["raceId"].to_numpy()
     subset = df_results[df_results["raceId"].isin(race_ids)]
+
+    subset = subset.dropna(subset=["fastestLapTime"])
+
+    if subset.empty:
+        return None, None
+
     fastest_lap_time_row = subset.loc[subset["fastestLapTime"].idxmin()].to_dict()
     driver_name = df_drivers[
         df_drivers["driverId"] == fastest_lap_time_row["driverId"]
@@ -89,9 +95,13 @@ def fastest_speed_recorded(
 ):
     race_ids = df_races[df_races["name"] == gp_name]["raceId"].to_numpy()
     subset = df_results[df_results["raceId"].isin(race_ids)]
-    fastest_speed_recorded_row = subset.loc[
-        pd.to_numeric(subset["fastestLapSpeed"], errors="coerce").dropna().idxmax()
-    ].to_dict()
+
+    speeds = pd.to_numeric(subset["fastestLapSpeed"], errors="coerce").dropna()
+
+    if speeds.empty:
+        return None, None
+
+    fastest_speed_recorded_row = subset.loc[speeds.idxmax()].to_dict()
     driver_name = df_drivers[
         df_drivers["driverId"] == fastest_speed_recorded_row["driverId"]
     ]["fullName"].item()
@@ -120,3 +130,22 @@ def abandon_reasons(
         data.insert(0, {"name": "Other", "value": int(others)})
 
     return data
+
+
+def yearly_fastest_lap(df_results: pd.DataFrame, df_races: pd.DataFrame, gp_name: str):
+    races_subset = df_races[df_races["name"] == gp_name][
+        ["raceId", "year"]
+    ].sort_values(by="year")
+    merged = pd.merge(races_subset, df_results, on="raceId").dropna()[
+        ["year", "fastestLapTime"]
+    ]
+
+    if merged.empty:
+        return [], []
+
+    parts = merged["fastestLapTime"].str.split(":", expand=True)
+    merged["seconds"] = parts[0].astype(float) * 60 + parts[1].astype(float)
+    best = merged.groupby("year")["seconds"].min().sort_index()
+    print(best)
+
+    return best.index.astype(int).tolist(), best.round(3).tolist()

@@ -1,5 +1,12 @@
 import streamlit as st
-from metrics import load_data, top_gp_winner, fastest_time, fastest_speed_recorded
+from streamlit_echarts import st_echarts
+from metrics import (
+    load_data,
+    top_gp_winner,
+    fastest_time,
+    fastest_speed_recorded,
+    yearly_fastest_lap,
+)
 
 df_drivers, df_races, df_driver_standings, df_results, _ = load_data()
 
@@ -27,15 +34,44 @@ col1.metric(
 )
 col2.metric(
     label="Fastest Lap",
-    value=fastest_lap_time,
-    delta_description=fastest_lap_driver,
+    value=fastest_lap_time if fastest_lap_time is not None else "-",
+    delta_description=(fastest_lap_driver if fastest_lap_driver is not None else "-"),
     border=True,
     help="Based on race sessions only; practice and qualifying are excluded.",
 )
 col3.metric(
     label="Fastest Lap Speed",
-    value=fastest_lap_speed,
-    delta_description=fastest_driver,
+    value=fastest_lap_speed if fastest_lap_speed is not None else "-",
+    delta_description=fastest_driver if fastest_driver is not None else "-",
     border=True,
     help="Based on race sessions only; practice and qualifying are excluded.",
 )
+
+years, laps = yearly_fastest_lap(df_results, df_races, gp_name)
+if len(years) > 0 and len(laps) > 0:
+    st_echarts(
+        {
+            "title": {
+                "subtext": f"{gp_name} fastest lap time evolution",
+                "bottom": 25,
+                "subtextStyle": {"fontSize": "14px"},
+            },
+            "tooltip": {"trigger": "axis"},
+            "xAxis": {
+                "type": "category",
+                "name": "Year",
+                "data": years,
+            },
+            "yAxis": {"type": "value", "name": "Lap time (s)"},
+            "series": [
+                {
+                    "type": "line",
+                    "data": laps,
+                    "smooth": True,
+                    "areaStyle": {"opacity": 0.15},
+                    "animationDuration": 800,
+                }
+            ],
+        },
+        height="400px",
+    )
