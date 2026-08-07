@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import streamlit as st
 
 
@@ -13,6 +14,11 @@ def load_data():
         pd.read_csv("./data/results.csv", na_values=[r"\N"]),
         pd.read_csv("./data/status.csv", na_values=[r"\N"]),
     )
+
+
+@st.cache_data
+def load_circuits():
+    return pd.read_csv("./data/circuits.csv", na_values=[r"\N"])
 
 
 def wins_by_gp(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_id: int):
@@ -148,3 +154,11 @@ def yearly_fastest_lap(df_results: pd.DataFrame, df_races: pd.DataFrame, gp_name
     best = merged.groupby("year")["seconds"].min().sort_index()
 
     return best.index.astype(int).tolist(), best.round(3).tolist()
+
+
+@st.cache_data
+def races_per_circuit(df_circuits: pd.DataFrame, df_races: pd.DataFrame):
+    race_counts = df_races.groupby("circuitId").size().rename("races")
+    df_map = df_circuits.merge(race_counts, on="circuitId")
+    df_map["size"] = 30000 + np.sqrt(df_map["races"]) * 4000
+    return df_map.sort_values(by="races", ascending=False)

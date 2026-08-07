@@ -9,6 +9,7 @@ st.set_page_config(
 pages = [
     st.Page("pages/drivers.py", title="Drivers", icon=":material/sports_motorsports:"),
     st.Page("pages/races.py", title="Races", icon=":material/sports_score:"),
+    st.Page("pages/circuits.py", title="Circuits", icon=":material/public:"),
 ]
 pg = st.navigation(pages)
 pg.run()
