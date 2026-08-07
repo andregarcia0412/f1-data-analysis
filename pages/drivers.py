@@ -1,6 +1,7 @@
+import math
+import numpy as np
 import streamlit as st
 from streamlit_echarts import st_echarts
-import math
 from metrics import (
     load_data,
     wins_by_gp,
@@ -8,6 +9,7 @@ from metrics import (
     poles_by_gp,
     points_per_season,
     abandon_reasons,
+    position_distribution,
 )
 
 df_drivers, df_races, df_driver_standings, df_results, df_status = load_data()
@@ -146,7 +148,6 @@ st_echarts(
             "bottom": 0,
             "subtextStyle": {"fontSize": "14px"},
         },
-        "grid": {"left": 8, "right": 40, "top": 20, "bottom": 30, "containLabel": True},
         "xAxis": {
             "type": "category",
             "data": reasons,
@@ -173,5 +174,36 @@ st_echarts(
             },
         ],
     },
-    height="420px",
+    height="400px",
+)
+
+position_counts = position_distribution(df_results, driver_id)
+
+st_echarts(
+    {
+        "title": {
+            "subtext": f"Distribution of {driver_name}'s Finishing Positions",
+            "bottom": 25,
+            "subtextStyle": {"fontSize": "14px"},
+        },
+        "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+        "xAxis": [
+            {
+                "type": "category",
+                "data": [str(p) for p in position_counts.index],
+                "axisTick": {"alignWithLabel": True},
+                "name": "Positions",
+            }
+        ],
+        "yAxis": [{"type": "value", "name": "Count"}],
+        "series": [
+            {
+                "name": "Count",
+                "type": "bar",
+                "data": position_counts.tolist(),
+                "barCategoryGap": 1,
+            }
+        ],
+    },
+    height="400px",
 )

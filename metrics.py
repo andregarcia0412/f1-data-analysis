@@ -162,3 +162,13 @@ def races_per_circuit(df_circuits: pd.DataFrame, df_races: pd.DataFrame):
     df_map = df_circuits.merge(race_counts, on="circuitId")
     df_map["size"] = 30000 + np.sqrt(df_map["races"]) * 4000
     return df_map.sort_values(by="races", ascending=False)
+
+
+def position_distribution(df_results: pd.DataFrame, driver_id: int):
+    counts = (
+        df_results[df_results["driverId"] == driver_id]["positionOrder"]
+        .value_counts()
+        .sort_index()
+    )
+
+    return counts.reindex(range(1, int(counts.index.max()) + 1), fill_value=0)
