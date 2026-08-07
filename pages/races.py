@@ -1,7 +1,7 @@
 import streamlit as st
 from metrics import load_data, top_gp_winner, fastest_time, fastest_speed_recorded
 
-df_drivers, df_races, df_driver_standings, df_results = load_data()
+df_drivers, df_races, df_driver_standings, df_results, _ = load_data()
 
 st.sidebar.title(":material/filter_alt: Filters", anchor=False)
 gp_name = st.sidebar.selectbox(

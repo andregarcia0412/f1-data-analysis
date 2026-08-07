@@ -11,6 +11,7 @@ def load_data():
         pd.read_csv("./data/races.csv"),
         pd.read_csv("./data/driver_standings.csv"),
         pd.read_csv("./data/results.csv"),
+        pd.read_csv("./data/status.csv"),
     )
 
 
@@ -95,3 +96,21 @@ def fastest_speed_recorded(
         df_drivers["driverId"] == fastest_speed_recorded_row["driverId"]
     ]["fullName"].item()
     return fastest_speed_recorded_row["fastestLapSpeed"], driver_name
+
+
+def abandon_reasons(df_results: pd.DataFrame, df_status: pd.DataFrame, driver_id: int):
+    driver_status_df = df_results[df_results["driverId"] == driver_id]
+    status_counts = (
+        pd.merge(driver_status_df, df_status, on="statusId")["status"]
+        .value_counts()
+        .drop("Finished", errors="ignore")
+    )
+
+    top = status_counts.head(5)
+    others = status_counts.iloc[5:].sum()
+
+    data = [{"name": name, "value": int(value)} for name, value in top.items()]
+    if others > 0:
+        data.append({"name": "Other", "value": int(others)})
+
+    return data

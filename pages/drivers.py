@@ -6,9 +6,10 @@ from metrics import (
     average_position,
     poles_by_gp,
     points_per_season,
+    abandon_reasons,
 )
 
-df_drivers, df_races, df_driver_standings, df_results = load_data()
+df_drivers, df_races, df_driver_standings, df_results, df_status = load_data()
 
 st.sidebar.title(":material/filter_alt: Filters", anchor=False)
 driver_name = st.sidebar.selectbox("Driver", df_drivers["fullName"].to_numpy())
@@ -128,6 +129,16 @@ st_echarts(
                 "animationDuration": 800,
             }
         ],
+    },
+    height="400px",
+)
+
+reasons = abandon_reasons(df_results, df_status, driver_id)
+st_echarts(
+    {
+        "title": {"text": "Driver Race Status", "top": "20"},
+        "tooltip": {"trigger": "item"},
+        "series": [{"name": "Reason", "type": "pie", "radius": "50%", "data": reasons}],
     },
     height="400px",
 )
