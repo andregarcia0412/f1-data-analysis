@@ -49,3 +49,10 @@ def points_per_season(df_results: pd.DataFrame, df_races: pd.DataFrame, driver_i
     driver_races_df = df_races[df_races["raceId"].isin(driver_results_df["raceId"])][["raceId", "year"]]
     df_points_per_season = pd.merge(driver_races_df, driver_results_df, on="raceId")
     return df_points_per_season.groupby("year")["points"].sum()
+
+def fastest_speed_recorded(df_results: pd.DataFrame, df_races: pd.DataFrame, df_drivers: pd.DataFrame, gp_name: str):
+    race_ids = df_races[df_races["name"] == gp_name]["raceId"].to_numpy()
+    subset = df_results[df_results["raceId"].isin(race_ids)]
+    fastest_speed_recorded_row = subset.loc[pd.to_numeric(subset["fastestLapSpeed"], errors="coerce").dropna().idxmax()].to_dict()
+    driver_name = df_drivers[df_drivers["driverId"] == fastest_speed_recorded_row["driverId"]]["fullName"].item()
+    return fastest_speed_recorded_row["fastestLapSpeed"], driver_name
