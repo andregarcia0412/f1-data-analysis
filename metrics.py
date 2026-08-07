@@ -146,6 +146,5 @@ def yearly_fastest_lap(df_results: pd.DataFrame, df_races: pd.DataFrame, gp_name
     parts = merged["fastestLapTime"].str.split(":", expand=True)
     merged["seconds"] = parts[0].astype(float) * 60 + parts[1].astype(float)
     best = merged.groupby("year")["seconds"].min().sort_index()
-    print(best)
 
     return best.index.astype(int).tolist(), best.round(3).tolist()
