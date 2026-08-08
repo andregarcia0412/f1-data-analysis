@@ -19,6 +19,7 @@ driver_name = st.sidebar.selectbox("Driver", df_drivers["fullName"].to_numpy())
 st.title(f"F1 Driver Analysis - {driver_name}", anchor=False)
 st.markdown(
     ":gray[Career record for one driver: where the wins and poles came from, how scoring changed season by season, why races ended early, and how the head-to-head against each teammate turned out.]",
+    anchors=False,
 )
 
 st.space()
@@ -139,12 +140,15 @@ if amount_won >= 1:
                 },
                 height="600px",
             )
+    st.divider()
 
-st.divider()
-st.markdown("""
+st.markdown(
+    """
     ## Season form
     :gray[Championship points per season. Point-scoring systems changed in 2010, so pre-2010 totals are not comparable with later ones.]
-""")
+""",
+    anchors=False,
+)
 
 points = points_per_season(df_results, df_races, driver_id)
 with st.container(key="season_form"):
@@ -178,10 +182,13 @@ with st.container(key="season_form"):
     )
 
 st.divider()
-st.markdown("""
+st.markdown(
+    """
     ## Why races ended early
     :gray[Recorded retirement reasons across the career, and how finishing positions are distributed overall.]
-""")
+""",
+    anchors=False,
+)
 
 data = abandon_reasons(df_results, df_status, driver_id, 15)
 reasons = [d["name"] for d in data]
