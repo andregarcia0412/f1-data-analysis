@@ -44,6 +44,17 @@ col4.metric(
 
 st.divider()
 
+st.html("""
+    <style>
+    .st-key-card_left, .st-key-card_right, .st-key-season_form, .st-key-abandon_reasons, .st-key-finishing_positions, .st-key-teammate_duels {
+        background-color: #15151E;
+        padding: 20px 12px 0px 12px;
+        border-radius: 12px;
+        border: 1px solid #2A2A37;
+    }
+    </style>
+""")
+
 if amount_won >= 1:
     st.markdown(
         """
@@ -52,17 +63,6 @@ if amount_won >= 1:
     """,
         anchors=False,
     )
-
-    st.html("""
-        <style>
-        .st-key-card_left, .st-key-card_right, .st-key-season_form, .st-key-abandon_reasons, .st-key-finishing_positions, st-key-teammate_duels {
-            background-color: #15151E;
-            padding: 20px 12px 0px 12px;
-            border-radius: 12px;
-            border: 1px solid #2A2A37;
-        }
-        </style>
-    """)
 
     col1, col2 = st.columns(2, vertical_alignment="top", gap="large")
     with col1:
@@ -291,16 +291,23 @@ if not duels.empty:
         """)
 
     with st.container(key="teammate_duels"):
-        # TODO: ajustar esse gráfico
         st_echarts(
             {
                 "backgroundColor": "#15151E",
+                "title": {
+                    "text": f"{driver_name} vs. teammates, season by season",
+                    "top": 0,
+                },
                 "tooltip": {
                     "trigger": "axis",
                     "axisPointer": {"type": "shadow"},
                     "formatter": tooltip_formatter,
                 },
-                "legend": {"data": ["Ahead", "Behind", "Neither classified"], "top": 0},
+                "legend": {
+                    "data": ["Ahead", "Behind", "Neither classified"],
+                    "top": 56,
+                },
+                "grid": {"top": 96, "left": 8, "right": 24, "containLabel": True},
                 "xAxis": {
                     "type": "value",
                     "name": "Races",
@@ -339,5 +346,5 @@ if not duels.empty:
                     },
                 ],
             },
-            height=f"{120 + len(labels) * 34}px",
+            height=f"{170 + len(labels) * 34}px",
         )
