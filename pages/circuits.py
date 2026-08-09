@@ -5,6 +5,12 @@ _, df_races, _, _, _ = load_data()
 df_circuits = load_circuits()
 
 st.title("F1 Circuits Around the World", anchor=False)
+st.markdown(
+    ":gray[Every circuit that has hosted a championship race, where it is, and how much of the calendar it has carried. Use the country filter to narrow the map and the table together.]",
+    anchors=False,
+)
+
+st.space()
 
 st.sidebar.title(":material/filter_alt: Filters", anchor=False)
 countries = sorted(df_circuits["country"].unique())
@@ -22,7 +28,15 @@ col1.metric(label="Circuits", value=len(df_map), border=True)
 col2.metric(label="Countries", value=df_map["country"].nunique(), border=True)
 col3.metric(label="Races Held", value=int(df_map["races"].sum()), border=True)
 
-st.space()
+st.divider()
+
+st.markdown(
+    """
+    ## Where the sport races
+    :gray[One bubble per circuit, placed at its real coordinates.]
+""",
+    anchors=False,
+)
 
 st.map(df_map, latitude="lat", longitude="lng", size="size", height=550)
 st.caption(
@@ -31,7 +45,15 @@ st.caption(
     text_alignment="center",
 )
 
-st.space()
+st.divider()
+
+st.markdown(
+    """
+    ## Circuit list
+    :gray[Sorted by races held, highest first. Scroll inside the grid for the rest of the field.]
+            """,
+    anchors=False,
+)
 
 st.dataframe(
     df_map[["name", "location", "country", "alt", "races"]],
