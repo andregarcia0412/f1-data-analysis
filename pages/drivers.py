@@ -157,7 +157,7 @@ with st.container(key="season_form"):
             "backgroundColor": "#15151E",
             "title": {
                 "text": f"{driver_name}'s points per season",
-                "subtext": "Each point is a full season total, including sprint points from 2021 onwards.",
+                "subtext": "Each point is a full season total, not counting sprints.",
                 "top": 0,
                 "subtextStyle": {"fontSize": "12px"},
             },
@@ -255,7 +255,7 @@ with st.container(key="finishing_positions"):
             "backgroundColor": "#15151E",
             "title": {
                 "text": f"Distribution of {driver_name}'s Finishing Positions",
-                "subtext": "Classified finishes only. The first column is highlighted because it is the same 105 wins reported in the metric above.",
+                "subtext": "Classified finishes only.",
                 "top": 0,
                 "subtextStyle": {"fontSize": "14px"},
             },

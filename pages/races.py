@@ -150,7 +150,7 @@ if not wins_per_grid_counts.empty:
             {
                 "backgroundColor": "#15151E",
                 "title": {
-                    "text": f"Wins by starting position at the Monaco Grand Prix ({from_pole} of {total_wins} from pole)",
+                    "text": f"Wins by starting position at the {gp_name} ({from_pole} of {total_wins} from pole)",
                     "subtext": "Each bar counts the races won from that grid slot. Positions with no bar have never produced a winner here, which is the point of showing the full grid rather than only the slots that scored.",
                     "top": 0,
                     "subtextStyle": {"fontSize": "12px"},
