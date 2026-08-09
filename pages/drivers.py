@@ -10,21 +10,42 @@ from metrics import (
     abandon_reasons,
     position_distribution,
     teammate_duels,
+    driver_image,
 )
 
 df_drivers, df_races, df_driver_standings, df_results, df_status = load_data()
 
 st.sidebar.title(":material/filter_alt: Filters", anchor=False)
 driver_name = st.sidebar.selectbox("Driver", df_drivers["fullName"].to_numpy())
-st.title(f"F1 Driver Analysis - {driver_name}", anchor=False)
-st.markdown(
+driver_id = df_drivers[df_drivers["fullName"] == driver_name]["driverId"].item()
+
+col1, col2 = st.columns([1, 10], vertical_alignment="center")
+
+col2.title(f"F1 Driver Analysis - {driver_name}", anchor=False)
+col2.markdown(
     ":gray[Career record for one driver: where the wins and poles came from, how scoring changed season by season, why races ended early, and how the head-to-head against each teammate turned out.]",
     anchors=False,
 )
 
+url = driver_image(driver_name)
+
+if url:
+    col1.markdown(
+        f'<img src="{url}" style="width:120px;height:120px;'
+        'border-radius:50%;object-fit:cover;border:2px solid #2A2A37">',
+        unsafe_allow_html=True,
+    )
+else:
+    col1.markdown(
+        f'<div style="width:120px;height:120px;'
+        "border-radius:50%;border:2px solid #2A2A37;background:#2A2A37;"
+        "display:flex;align-items:center;justify-content:center;"
+        'color:#CDD6F4;font-size:40px;font-weight:600">'
+        f"{driver_name.split(" ")[0][0] + driver_name.split(" ")[1][0]}</div>",
+        unsafe_allow_html=True,
+    )
 st.space()
 
-driver_id = df_drivers[df_drivers["fullName"] == driver_name]["driverId"].item()
 
 won_gp_counts, total_races = wins_by_gp(df_results, df_races, driver_id)
 amount_won = won_gp_counts.sum()

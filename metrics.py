@@ -1,3 +1,4 @@
+import requests
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -259,3 +260,19 @@ def top_gp_constructor(
         ].item(),
         int(race_results.values[0]),
     )
+
+
+@st.cache_data(ttl=86400)
+def driver_image(driver_name: str) -> str | None:
+    response = requests.get(
+        f"https://en.wikipedia.org/api/rest_v1/page/summary/{driver_name.replace(" ", "_")}",
+        headers={
+            "User-Agent": "f1-dashboard (https://github.com/andregarcia0412/f1-data-analysis)"
+        },
+        timeout=10,
+    )
+
+    if not response.ok:
+        return None
+
+    return response.json().get("originalimage", {}).get("source")
