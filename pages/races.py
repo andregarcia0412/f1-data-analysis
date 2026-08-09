@@ -19,6 +19,11 @@ gp_name = st.sidebar.selectbox(
     "Grand Prix", df_races["name"].drop_duplicates().to_numpy()
 )
 st.title(f"F1 Grand Prix Analysis - {gp_name}", anchor=False)
+st.markdown(
+    ":gray[Event-level record for one Grand Prix: who has won it most, how lap times have fallen across its history, and how much the starting grid decides the result.]"
+)
+
+st.space()
 
 top_wins, top_winner = top_gp_winner(df_results, df_races, df_drivers, gp_name)
 fastest_lap_time, fastest_lap_driver = fastest_time(
@@ -60,67 +65,119 @@ col4.metric(
     border=True,
 )
 
+st.divider()
+st.markdown(
+    """
+    ## How the event has changed
+    :gray[Fastest lap set in each running of the race, from the first championship season to the most recent.]
+""",
+    anchors=False,
+)
+
+st.html("""
+    <style>
+    .st-key-lap_evolution, .st-key-wins_starting {
+        background-color: #15151E;
+        padding: 20px 12px 0px 12px;
+        border-radius: 12px;
+        border: 1px solid #2A2A37;
+    }
+    </style>
+""")
+
 years, laps = yearly_fastest_lap(df_results, df_races, gp_name)
 if len(years) > 0 and len(laps) > 0:
-    st_echarts(
-        {
-            "title": {
-                "subtext": f"{gp_name} fastest lap time evolution",
-                "bottom": 25,
-                "subtextStyle": {"fontSize": "14px"},
+    with st.container(key="lap_evolution"):
+        st_echarts(
+            {
+                "backgroundColor": "#15151E",
+                "title": {
+                    "text": f"{gp_name} fastest lap time evolution",
+                    "subtext": "One point per edition, so lower is faster. Years the race was not held are absent from the axis rather than plotted as zero. The step-ups follow rule changes that cut downforce or engine power; the long slide between them is normal development.",
+                    "top": 0,
+                    "subtextStyle": {
+                        "fontSize": 12,
+                        "lineHeight": 18,
+                        "width": 800,
+                        "overflow": "break",
+                        "align": "left",
+                    },
+                },
+                "grid": {
+                    "top": 100,
+                    "left": 50,
+                    "right": 50,
+                    "bottom": 24,
+                    "containLabel": True,
+                },
+                "tooltip": {"trigger": "axis"},
+                "xAxis": {
+                    "type": "category",
+                    "name": "Year",
+                    "data": years,
+                },
+                "yAxis": {"type": "value", "name": "Lap time (s)"},
+                "series": [
+                    {
+                        "type": "line",
+                        "data": laps,
+                        "smooth": True,
+                        "areaStyle": {"opacity": 0.15},
+                        "animationDuration": 800,
+                    }
+                ],
             },
-            "tooltip": {"trigger": "axis"},
-            "xAxis": {
-                "type": "category",
-                "name": "Year",
-                "data": years,
-            },
-            "yAxis": {"type": "value", "name": "Lap time (s)"},
-            "series": [
-                {
-                    "type": "line",
-                    "data": laps,
-                    "smooth": True,
-                    "areaStyle": {"opacity": 0.15},
-                    "animationDuration": 800,
-                }
-            ],
-        },
-        height="400px",
-    )
+            height="400px",
+        )
 
+st.divider()
 wins_per_grid_counts = wins_per_grid(df_results, df_races, gp_name)
 
 if not wins_per_grid_counts.empty:
     total_wins = int(wins_per_grid_counts.sum())
     from_pole = int(wins_per_grid_counts.get(1, 0))
 
-    st_echarts(
-        {
-            "title": {
-                "subtext": (
-                    f"Wins by starting position at the {gp_name} "
-                    f"({from_pole} of {total_wins} won from pole)"
-                ),
-                "bottom": 25,
-                "subtextStyle": {"fontSize": "14px"},
-            },
-            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
-            "xAxis": {
-                "type": "category",
-                "name": "Starting position",
-                "data": [str(grid) for grid in wins_per_grid_counts.index],
-                "axisTick": {"alignWithLabel": True},
-                "axisLabel": {"interval": 0},
-            },
-            "yAxis": {"type": "value", "name": "Wins", "minInterval": 1},
-            "series": [
-                {
-                    "type": "bar",
-                    "data": wins_per_grid_counts.tolist(),
-                    "animationDuration": 800,
-                }
-            ],
-        },
-        height="400px",
+    st.markdown(
+        """
+            ## How much the grid decides
+            :gray[Winning starting positions across every edition of the race.]
+        """,
+        anchors=False,
     )
+
+    with st.container(key="wins_starting"):
+        st_echarts(
+            {
+                "backgroundColor": "#15151E",
+                "title": {
+                    "text": f"Wins by starting position at the Monaco Grand Prix ({from_pole} of {total_wins} from pole)",
+                    "subtext": "Each bar counts the races won from that grid slot. Positions with no bar have never produced a winner here, which is the point of showing the full grid rather than only the slots that scored.",
+                    "top": 0,
+                    "subtextStyle": {"fontSize": "12px"},
+                },
+                "grid": {
+                    "top": 100,
+                    "left": 124,
+                    "right": 124,
+                    "bottom": 24,
+                    "containLabel": True,
+                },
+                "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+                "xAxis": {
+                    "type": "category",
+                    "name": "Starting position",
+                    "data": [str(grid) for grid in wins_per_grid_counts.index],
+                    "axisTick": {"alignWithLabel": True},
+                    "axisLabel": {"interval": 0},
+                },
+                "yAxis": {"type": "value", "name": "Wins", "minInterval": 1},
+                "series": [
+                    {
+                        "type": "bar",
+                        "data": wins_per_grid_counts.tolist(),
+                        "animationDuration": 800,
+                    }
+                ],
+            },
+            height="400px",
+        )
