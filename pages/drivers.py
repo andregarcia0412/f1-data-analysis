@@ -161,6 +161,13 @@ with st.container(key="season_form"):
                 "top": 0,
                 "subtextStyle": {"fontSize": "12px"},
             },
+            "grid": {
+                "top": 100,
+                "left": 50,
+                "right": 50,
+                "bottom": 24,
+                "containLabel": True,
+            },
             "tooltip": {"trigger": "axis"},
             "xAxis": {
                 "type": "category",
@@ -204,6 +211,13 @@ with st.container(key="abandon_reasons"):
                 "top": 0,
                 "subtextStyle": {"fontSize": "12px"},
             },
+            "grid": {
+                "top": 100,
+                "left": 50,
+                "right": 50,
+                "bottom": 24,
+                "containLabel": True,
+            },
             "xAxis": {
                 "type": "category",
                 "data": reasons,
@@ -246,6 +260,13 @@ with st.container(key="finishing_positions"):
                 "subtextStyle": {"fontSize": "14px"},
             },
             "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "grid": {
+                "top": 100,
+                "left": 80,
+                "right": 80,
+                "bottom": 24,
+                "containLabel": True,
+            },
             "xAxis": [
                 {
                     "type": "category",
