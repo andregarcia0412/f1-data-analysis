@@ -9,9 +9,10 @@ from metrics import (
     wins_per_grid,
     top_gp_constructor,
     load_constructors,
+    dnf_percentage,
 )
 
-df_drivers, df_races, df_driver_standings, df_results, _ = load_data()
+df_drivers, df_races, df_driver_standings, df_results, df_status = load_data()
 df_constructors = load_constructors()
 
 st.sidebar.title(":material/filter_alt: Filters", anchor=False)
@@ -76,7 +77,7 @@ st.markdown(
 
 st.html("""
     <style>
-    .st-key-lap_evolution, .st-key-wins_starting {
+    .st-key-lap_evolution, .st-key-wins_starting, .st-key-dnf_rate {
         background-color: #15151E;
         padding: 20px 12px 0px 12px;
         border-radius: 12px;
@@ -181,3 +182,58 @@ if not wins_per_grid_counts.empty:
             },
             height="400px",
         )
+
+st.divider()
+
+st.markdown(
+    """
+    ## Reliability
+    :gray[Share of the field that failed to finish, in each running of the race.]
+""",
+    anchors=False,
+)
+
+dnf_years, dnf_percentages = dnf_percentage(df_results, df_races, df_status, gp_name)
+
+with st.container(key="dnf_rate"):
+    st_echarts(
+        {
+            "backgroundColor": "#15151E",
+            "title": {
+                "text": f"{gp_name} DNF rate per year",
+                "subtext": "Retirements as a percentage of cars that started. A DNF is any car classified with a status other than a finish or a lapped finish, so accidents and mechanical failures are counted together.",
+                "top": 0,
+                "subtextStyle": {
+                    "fontSize": 12,
+                    "lineHeight": 18,
+                    "width": 800,
+                    "overflow": "break",
+                    "align": "left",
+                },
+            },
+            "grid": {
+                "top": 100,
+                "left": 50,
+                "right": 50,
+                "bottom": 24,
+                "containLabel": True,
+            },
+            "tooltip": {"trigger": "axis"},
+            "xAxis": {
+                "type": "category",
+                "name": "Year",
+                "data": dnf_years,
+            },
+            "yAxis": {"type": "value", "name": "DNF rate (%)"},
+            "series": [
+                {
+                    "type": "line",
+                    "data": dnf_percentages,
+                    "smooth": True,
+                    "areaStyle": {"opacity": 0.15},
+                    "animationDuration": 800,
+                }
+            ],
+        },
+        height="400px",
+    )

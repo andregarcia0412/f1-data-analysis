@@ -276,3 +276,31 @@ def driver_image(driver_name: str) -> str | None:
         return None
 
     return response.json().get("originalimage", {}).get("source")
+
+
+def dnf_percentage(
+    df_results: pd.DataFrame,
+    df_races: pd.DataFrame,
+    df_status: pd.DataFrame,
+    gp_name: str,
+):
+    classified = df_status[
+        df_status["status"].eq("Finished") | df_status["status"].str.startswith("+")
+    ]["statusId"]
+    non_starters = df_status[
+        df_status["status"].isin(
+            ["Did not qualify", "Did not prequalify", "Withdrew", "107% Rule"]
+        )
+    ]["statusId"]
+
+    subset = df_races[df_races["name"] == gp_name][["raceId", "year"]]
+    entries = pd.merge(df_results[["raceId", "statusId"]], subset, on="raceId")
+    entries = entries[~entries["statusId"].isin(non_starters)]
+
+    if entries.empty:
+        return [], []
+
+    entries["dnf"] = ~entries["statusId"].isin(classified)
+    percentages = entries.groupby("year")["dnf"].mean().mul(100).sort_index()
+
+    return percentages.index.astype(int).tolist(), percentages.round(1).tolist()
